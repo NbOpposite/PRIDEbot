@@ -9,7 +9,6 @@ module.exports = class RoleCommand extends RestrictedCommand {
       memberName: 'role',
       description: 'Gives you the specified role. To get a list of all available roles, run this command with no arguments. If there are multiple roles with the same name, use `~<number>` to select which role you want',
       examples: ['role', 'role They/Them', 'role He/Him~2'],
-      guildOnly: true,
       clientPermissions: ['MANAGE_ROLES'],
       format: '[role[~<number>]]',
       permGroup: 'Member',
@@ -80,7 +79,16 @@ module.exports = class RoleCommand extends RestrictedCommand {
     if(!Array.isArray(roleLimits)) return msg.reply('Self-role configuration is malconfigured');
     const [upper, lower] = roleLimits.map(role=>guild.roles.get(role)).filter(role=>role).sort((a,b)=>b.position-a.position);
     if(upper === undefined || lower === undefined) return msg.reply('Self-role configuration is malconfigured');
-    const roles = guild.roles.filter(role => role.position < upper.position && role.position > lower.position).sort((a,b) => b.position - a.position);
+    const roles = guild.roles
+      .filter(role => role.position < upper.position && role.position > lower.position)
+      .filter(role => {
+        if(role.permissions.bitfield & 0x79C0203E) {
+          this.client.emit('warn', `Role '${role.name}' in '${guild.name}' has dangerous permissions, omitting from self-role.`);
+          return false;
+        }
+        return true;
+      })
+      .sort((a,b) => b.position - a.position);
 
     if(!args) {
       return this.listRoles(roles, msg);

@@ -1,12 +1,11 @@
 const { dbPromise } = require('../db');
 const { Collection, User, GuildMember, Message } = require('discord.js');
-const { CommandMessage } = require('discord.js-commando');
 const userDataCollection = new Collection();
 
 async function resolveUserId(user) {
   if (user instanceof Function) user = await user();
   if (user instanceof GuildMember || user instanceof User) return user.id;
-  if (user instanceof Message || user instanceof CommandMessage) return user.author.id;
+  if (user instanceof Message) return user.author.id;
   if (typeof user === 'string' && user.match(/^\d+$/)) return user;
   throw new Error('User is not a user object or user id');
 }

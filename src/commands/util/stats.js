@@ -43,7 +43,6 @@ module.exports = class StatsCommand extends RestrictedCommand {
       memberName: 'stats',
       description: 'Gets stats from a server. Specified server can only be used by PRIDEverse moderators',
       examples: ['stats', 'stats dru'],
-      guildOnly: true,
       clientPermissions: [],
       format: '[server]',
       permGroup: 'Member',

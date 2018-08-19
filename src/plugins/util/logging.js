@@ -57,11 +57,15 @@ class Logging extends Plugin {
     return prefix+str+suffix;
   }
 
+  inspectObj(name, obj, embed) {
+    if(typeof obj !== 'string') embed.addField(`${name} - Inspect`, this.cropString(util.inspect(obj), '```\n', '\n```'));
+    return embed;
+  }
+
   inspection(name, obj, embed) {
     embed.addField(`${name} - Type`, this.cropString(this.getType(obj)), true);
     if(obj !== null || obj !== undefined) embed.addField(`${name} - String Value`, this.cropString(obj), true);
-    if(typeof obj !== 'string') embed.addField(`${name} - Inspect`, this.cropString(util.inspect(obj), '```\n', '\n```'));
-    return embed;
+    return this.inspectObj(name, obj, embed);
   }
 
   logError(err) {
@@ -125,8 +129,11 @@ class Logging extends Plugin {
     embed
       .setTitle('Command blocked')
       .setDescription('A command got blocked from executing')
-      .addField('Reason', this.cropString(reason));
-    this.inspection('Message', msg, embed);
+      .addField('Command',  this.cropString(`${msg.command.group.name}:${msg.command.memberName}`), true)
+      .addField('Reason', this.cropString(reason), true)
+      .addField('User',  this.cropString(`${msg.author.tag} (${msg.author.id})`))
+      .addField('Context',  this.cropString(`${msg.guild ? `${msg.guild.name} (#${msg.channel.name})` : 'DMs'}`))
+      .addField('Message',  this.cropString(msg.content));
     webhook.send(embed);
   }
 
