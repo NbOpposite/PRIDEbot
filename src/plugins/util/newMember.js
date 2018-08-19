@@ -68,8 +68,10 @@ class NewMember extends Plugin {
     }
     newUser.messages++;
     const curTime = new Date().getTime();
+    const newUsersHold = guild.settings.get('newUsersHold', []);
     if(newUser.messages >= newUserConf.messageThreshold
-      && curTime - newUser.joined > newUserConf.timeThreshold) {
+      && curTime - newUser.joined > newUserConf.timeThreshold
+      && !newUsersHold.includes(message.author.id)) {
       delete newUsers[message.author.id];
       guild.settings.set('newUsers', newUsers);
       await message.member.roles.add(newUserConf.regularRole);
