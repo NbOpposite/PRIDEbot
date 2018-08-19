@@ -88,7 +88,7 @@ bot.registry
   .registerTypesIn(path.join(__dirname, 'types'))
   .registerCommandsIn(path.join(__dirname, 'commands'));
 bot.plugins
-  .registerGroup('default', 'Default')
+  .registerGroup('ipc', 'IPC')
   .registerGroup('privacy', 'Privacy')
   .registerGroup('jokes', 'Jokes')
   .registerGroup('util', 'Util')

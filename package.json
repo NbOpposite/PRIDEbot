@@ -24,6 +24,7 @@
     "discord.js-commando": "git+https://github.com/discordjs/Commando.git",
     "discord.js-plugins": "git+https://github.com/NbOpposite/discord.js-plugins.git",
     "mime-types": "^2.1.19",
+    "node-ipc": "^9.1.1",
     "node-opus": "^0.3.0",
     "request": "^2.87.0",
     "sqlite": "^2.9.2",
@@ -38,8 +39,9 @@
     "mocha": "^5.2.0"
   },
   "localDependencies": {
-    "discord.js-plugins": "../discord.js-plugins",
-    "discord.js-commando": "../Commando",
-    "discord.js": "../discord.js"
+    "discord.js-plugins": "../../djs/discord.js-plugins",
+    "discord.js-commando": "../../djs/Commando",
+    "discord.js": "../../djs/discord.js",
+    "node-ipc-requests": "../node-ipc-requests"
   }
 }
