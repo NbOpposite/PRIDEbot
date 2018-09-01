@@ -11,16 +11,72 @@ class IpcPlugin extends Plugin {
     };
     super(client, info);
     this.server = new Server('pridebot');
-    this.server.router.addRoute('members', async (req) => {
-      const login = await this.getGuildLogin(req, true);
-      return (await login.guild.members.fetch()).map(e => {
+    this.server.router.addRoute('members', this.listMembers.bind(this));
+    this.server.router.addRoute('roles', this.listRoles.bind(this));
+    this.server.router.addRoute('me', this.getMe.bind(this));
+  }
+
+  async listMembers(req) {
+    const login = await this.getGuildLogin(req, true);
+    return (await login.guild.members.fetch()).map(e => {
+      return {
+        tag: e.user.tag,
+        name: e.displayName,
+        color: e.displayHexColor
+      };
+    });
+  }
+
+  async listRoles(req) {
+    const login = await this.getGuildLogin(req, true);
+    return login.guild.roles.sort((a,b) => b.position - a.position)
+      .map(e => {
         return {
-          tag: e.user.tag,
-          name: e.displayName,
-          color: e.displayHexColor
+          id: e.id,
+          name: e.name,
+          color: e.hexColor,
+          permissions: e.permissions.toArray()
         };
       });
-    });
+  }
+
+  async getMe(req) {
+    if(!req.loginUser) throw new Error('You must be logged in to access this.');
+    const user = await this.client.users.fetch(req.loginUser)
+      .catch(() => {throw new Error('Invalid login user provided.');});
+    const guilds = {};
+    const globalGroups = new Set();
+    let isGlobalMember = false;
+    for (let [, guild] of this.client.guilds) {
+      let member;
+      try {
+        member = await guild.members.fetch(user);
+      } catch (err) {
+        continue;
+      }
+      const guildInfo = {name: guild.name, id: guild.id, groups: [], member: false};
+      const permGroups = guild.settings.get('permissionRoles', {});
+      for (const group in permGroups) {
+        const roles = Array.isArray(permGroups[group]) ? permGroups[group] : [permGroups[group]];
+        for (const role of roles) {
+          if (!member.roles || !member.roles.has(role)) continue;
+
+          guildInfo.groups.push(group);
+          globalGroups.add(group);
+          if (group === 'Member') {
+            isGlobalMember = true;
+            guildInfo.member = true;
+          }
+        }
+      }
+      guilds[guild.id] = guildInfo;
+    }
+    return {
+      owner: this.client.isOwner(user),
+      member: isGlobalMember,
+      groups: [...globalGroups],
+      guilds,
+    };
   }
 
   async getGuildLogin(req, ownerBypass = false) {
@@ -59,6 +115,11 @@ class IpcPlugin extends Plugin {
         }
       }
     }
+    
+    if(!(ownerBypass && this.client.isOwner(user)) && !groups.includes('Member')) {
+      throw new Error('You must be a member of the server to fetch its members.');
+    }
+
     return {
       member,
       user,
