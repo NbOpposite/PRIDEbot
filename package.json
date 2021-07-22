@@ -47,7 +47,7 @@
     "moment-timezone": "^0.5.27",
     "request": "^2.88.0",
     "tough-cookie": "^4.0.0",
-    "xlsx": "^0.15.5",
+    "xlsx": "^0.17.0",
     "ytdl-core": "^4.8.2"
   },
   "devDependencies": {
